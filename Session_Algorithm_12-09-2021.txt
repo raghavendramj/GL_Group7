@@ -1,0 +1,200 @@
+ The most commonly used Big O descriptions are
+
+O(1) always terminates in about the same amount of time, regardless of the input size.
+O(logN) takes a fixed additional amount of time each time the input size doubles.
+O(N) takes twice as long to finish if the input size doubles.
+O(N2) takes four times as long if the input size doubles.
+O(2N) increases exponentially as the input size increases.
+
+
+Write a program to find the key element in sorted and rotated Array...
+
+Arr[] = { 3,4,2,1,9,8,7}  // original array
+Arr[]= {1,2,3,4,7,8,9}   // sorted array
+
+	1,2,3,4,7,8,9
+	9,1,2,3,4,7,8 -> 1
+	8,9,1,2,3,4,7 -> 2
+	7,8,9,1,2,3,4 -> 3
+
+Arr[] = {7,8,9,1,2,3,4} // rotated array ->
+
+Key to find  : 8
+Key to find  : 2
+Key to find  : 4
+Key to find  : 7
+
+Location: 2/1 -> based on array index considerations.
+
+Steps:
+	-> Sort the array -> nlogn
+	-> left-rotate the array.
+	-> search algo to find the element -> logn
+
+------->
+Step 1:
+	-> Merge Sort -> nlogn
+			psudocode
+			Concept: Divide and Conquer
+
+			mergeSort(arr, low, high)
+				-> if(low < high)
+						yes ->
+							mid = low + high /2;
+							mergeSort(arr, low, mid);
+							mergeSort(arr, mid+1, high);
+							merge(arr, low, mid, high);
+
+			merge(arr, low, mid, high) {
+				i <-low //initail index of first sub-array
+				j <- mid+1 // initail index of my second sub-array
+				k <- initial index of my merged array
+				2, 3, 4,					1,7, 8, 9
+
+					j -> 4, i-> 0, k-> 1  out -> [1]
+					j -> 4, i-> 1, k-> 2  out -> [1, 3]
+					j -> 4, i-> 2, k-> 3  out -> [1, 3, 4]
+					j -> 4, i-> 2, k-> 3  out -> [1, 3, 4]
+					j -> 4, i-> 3, k-> 4  out -> [1, 2, 3, 4, 7, 8, 9]
+
+				while(i<=mid && j <=ub) {
+					if(arr[i] < arr[j] ) {
+						out[k] = arr[i];
+						i++;
+					} else {
+						out[k] = arr[j];
+						j++;
+					}
+					k++;
+					// out[k++] = arr[i] < arr[j]  ? arr[i++] : arr[j++];
+				}
+
+				if( i> mid){
+					//copy remaining elements on left half, if there any..
+					while(j<= ub) {
+						out[k] = arr[i];
+						k++;
+						j++;
+					}
+				} else {
+						//copy remaining elements on right half, if there any..
+					while(j<=mid) {
+						out[k] = arr[i];
+						i++;
+						k++;
+					}
+				}
+				//copy the new array from lb/low to high/ub
+				for x -> lb to ub, x++
+					arr[x] = out[x];
+				return arr;
+		}
+
+ left-rotate the array.
+	1,2,3,4,7,8,9
+
+
+	leftRotateByOne(arr)
+		temp -> arr[0]
+		for i-> 0 to size -1
+			arr[i] = arr[i+1];
+		arr[size -1]  = temp;
+
+		1,2,3,4,7,8,9
+		2,3,4,7,8,9,1 ->1
+		3,4,7,8,9,1,2 -> 2
+		4,7,8,9,1,2,3 -> 3
+		7,8,9,1,2,3,4 -> 4
+
+		Final Array: 7,8,9,1,2,3,4
+
+		With TC: logn
+
+		find element : 9
+
+		1. Searching my pivot element	-> last element of the sorted array  -> using binary search -> modified binary search -> my logic for comparsion for finding the element varies
+		2. Searching my key element
+
+		//  7,8,9,1,2,3,4  -> index of pivot :- 2
+		findPivotElement(arr, low, high)
+			if(high < low)
+				return -1;
+			else if (high == low)
+				return low;
+
+			mid = (low + high) / 2;  (0+6)/2 = 3
+			low-> 0 , mid -> 3, high-> 6,
+					arr[] -> [7,8,9,1,2,3,4],
+						arr[mid] =>arr[mid+1]
+						=> arr[3] =1 > arr[4] = 2
+						=> 1 > 2 => false
+
+			if(mid < high && arr[mid ]> arr[mid+1])
+				return mid;
+
+			low-> 0 , mid -> 3, high-> 6,
+				arr[] -> [7,8,9,1,2,3,4],
+						arr[mid] < arr[mid-1]
+					=> arr[3] =1 > arr[2] = 9
+					=> 1 < 9 => true
+					return 3-1 = 2
+
+			else if(mid > low && arr[mid] < arr[mid-1])
+				return mid-1;
+
+			else if(arr[low] >= arr[mid])
+				return findPivotElement(arr, low, mid-1);
+
+			return findPivotElement(arr, mid+1, high);
+
+
+			findElementViaPivotedBinarySearch(arr, n, key)
+				int pivotElement = findPivotElement(arr, 0, n-1);
+				// -1 -> the array is already sorted without any rotations.
+				if(pivot == -1)
+					return binarySearch(arr, 0, n-1, key);
+				else if(arr[pivot] == key)
+					return pivot;
+				else if(arr[0] <= key)
+					7,8,9  -> 8
+					1,2,3,4  -> 4
+					binarySearch(arr, 0, pivot-1, key);
+				else
+					binarySearch(arr, pivot+1, n-1, key);
+
+
+		int binarySearch(int arr[], int low, int high, int key) {
+			if (high < low)
+				return -1;
+
+			/* low + (high - low)/2; */
+			int mid = (low + high) / 2;
+
+			if (key == arr[mid])
+				return mid;
+			else if (key > arr[mid])
+				return binarySearch(arr, (mid + 1), high, key);
+			return binarySearch(arr, low, (mid - 1), key);
+		}
+
+---------------------------------------------------------------------------------------------------
+
+Question 2 
+----------------
+
+You are given an array A consisting of N positive integers. Each integer represents the number of elements from a country, for a total of N countries. 
+Find the maximum number of teams that can be formed by forming teams of size K such that each element in the team is from a different country. 
+
+Input: N = 4, K = 3, arr[] = {4, 3, 5, 6} 
+			
+			4,3,5 
+Output: 5 
+
+Explanation: 
+Consider the countries are named W, X, Y and Z. The possible ways of forming the teams are {W, X, Y}, {W, Y, Z}, {W, X, Y}, {X, Y, Z}, {W, Y, Z} such that in each set there is no more than 1 element from a country. 
+Therefore, the total count of teams formed is 5. 
+
+
+
+
+
