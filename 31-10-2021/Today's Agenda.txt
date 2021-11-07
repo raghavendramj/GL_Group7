@@ -1,0 +1,284 @@
+DBMS:
+Problem Description:
+	An LPG company wants to maintain Customer’s details such as Customer Id, Name, Gender, Address, Phone No, Connection Type which is product Type (14.2 Kg or 19.0 Kg or 5Kg cylinders), Order Id, Order Date, Quantity (No of cylinders ordered), Payment Type, Ordered Status (Ordered or Cancelled), Order cancelled date, Reason for Order Cancellation, Invoice Id, Date of Invoice, Delivery Status (Delivered or Undelivered), If Undelivered, Date of bill cancelled, and Reason for Undelivery, Price of Product in every Month and Year.
+
+
+Steps to connect to database - MySQL-Shell
+ MySQL  JS > \sql
+	Switching to SQL mode... Commands end with ;
+ MySQL  SQL > \connect root@localhost
+	Fetching schema names for autocompletion... Press ^C to stop.
+	Your MySQL connection id is 9 (X protocol)
+	Server version: 8.0.26 MySQL Community Server - GPL
+	No default schema selected; type \use <schema> to set one
+
+1. Create database
+	-> lpg-database, lpg
+
+	Query:
+		create database lpgdb;
+		use lpgdb;
+
+1.	Write a program to create below tables.
+Note:
+	AI -> Auto Increment
+	PK -> Primary Key
+	FK -> Foreign Key
+
+Table name : cust_details
+	Columns:
+		Id	int AI PK
+		Name	varchar(50)
+		Gender	varchar(1)
+		Address	varchar(100)
+		Phone_NO	bigint
+		Connection_Type	decimal(3,1)
+		No_Of_Cylinders	int
+
+
+Query:
+	drop table cust_details;
+	create table if not exists cust_details(
+		id int auto_increment primary key,
+		name varchar(50),
+		gender varchar(100),
+		address varchar(2),
+		phone_no bigint,
+		connection_type decimal(3, 1),
+		no_of_cylinders int
+	);
+
+Table name :orders
+	Columns:
+		Id	int AI PK
+		Date	date
+		Cust_Id	int FK
+		Quantity	int
+		Payment_type	varchar(30)
+		Status	varchar(30)
+Query:
+	create table orders (
+		id int auto_increment primary key,
+		date date,
+		cust_id int,
+		quantity int,
+		payment_type varchar(30),
+		status varchar(30),
+		foreign key(cust_id) references cust_details(id)
+	);
+
+Table name:	cancelled_orders
+	Columns:
+		Order_Id	int FK
+		Date	date
+		Reason	varchar(50)
+Query:
+	create table cancelled_orders (
+		order_id int,
+		date date,
+		reason varchar(50),
+		foreign key(order_id) references orders(id)
+	);
+
+Table:billing_details
+	Columns:
+		Inv_Id	int AI PK
+		Date	date
+		Order_Id	int FK
+		Delivery_Status	varchar(30)
+
+Query:
+	create table billing_details(
+		inv_id int auto_increment
+		primary key,
+		date date,
+		order_id int,
+		delivery_status varchar(30),
+		foreign key(order_id) references orders(id)
+	);
+
+Table:cancelled_bills
+	Columns:
+		Inv_Id	int FK
+		Date	date
+		Reason	varchar(50)
+Query:
+	create table cancelled_bills (
+		inv_id int,
+		date date,
+		reason varchar(50),
+		foreign key(inv_id) references billing_details(inv_id)
+	);
+
+Table:pricing
+Columns: Insert Pricing Details every month of all products (14.2, 19.0, 5.0 Kg cylinders)
+	Type	decimal(3,1)
+	Month	varchar(10)
+	Year	int
+	Price	int
+Query:
+	create table Pricing (
+		Type decimal(3,1),
+		Month varchar(10),
+		Year int,
+		Price int
+	);
+
+
+Inserting tuples to database tables:
+1. Cust_details:
+	insert into cust_details (Name, Gender, Address, Phone_No, Connection_Type, No_Of_Cylinders) values ('Harish', 'M', '1-2, bglr', 1987654322, 14.2, 1);
+
+3. Write a query to display a table with customer Id, Name, Connection_Type and No_Of Cylinders ordered from orders table.
+
+We can use join, cust_details and orders based on cust_id and id also filter for ordered only
+
+Tables Involved:
+	cust_details
+	orders
+	merged table => Customer_order
+
+	i. We need to fetch info from orders
+		for unique customers Condition -> grouping with cust_id and quantity
+		whose status is Ordered
+
+	First Sub-Query:-> Customer_order => co
+		select cust_id, sum(quantity) as no_of_cylinders
+         from orders
+         where status='Ordered'
+         group by cust_id;
+
+	Final Query:
+		select c.id, c.name, c.connection_type, co.no_of_cylinders
+		from cust_details c
+		inner join (
+			select cust_id, sum(quantity) as no_of_cylinders
+			 from orders
+			 where status='Ordered'
+			 group by cust_id
+		) as co on c.id=co.cust_id;
+
+4.	Find Last Delivery Date from billing_details table of every customer and display customer Id and Name, Last_Delivery_Date and Quantity using Joins.
+(Note that the date in billing_details will act as last delivery date).
+
+Tables Involved:
+	cust_details
+	orders
+	billing_details
+	merged table for delivered_orders =>delivered_orders => do
+	merged table for manipulated delivered_orders =>delivered_orders => mdo
+
+	select * from cust_details;
+	select * from orders;
+	select * from billing_details;
+
+	i. Successful delivered orders
+		select order_id, date
+		from billing_details
+		where delivery_status='Delivered';
+
+	ii. join orders table with delivered_orders(do) => mdo
+		select o.id as order_id, o.cust_id as customer_id, o.quantity as quantity, do.date as delivery_date
+		from orders as o
+		inner join
+		(
+			select order_id, date
+			from billing_details
+			where delivery_status='Delivered'
+		) as do on o.id=do.order_id;
+
+	 iii.
+	 select order_id, customer_id, max(delivery_date) as last_delivery_date, sum(quantity) as quantity
+	 from(
+			select o.id as order_id, o.cust_id as customer_id, o.quantity as quantity, do.date as delivery_date
+			from orders as o
+			inner join
+			(
+				select order_id, date
+				from billing_details
+				where delivery_status='Delivered'
+			) as do on o.id=do.order_id
+	 ) as mpt
+	 group by customer_id;
+	 
+	 iv.
+		select c.id as cust_id, c.name as cust_name, p.last_delivery_date, p.quantity
+		from cust_details c
+		join (
+				 select order_id, customer_id, max(delivery_date) as last_delivery_date, sum(quantity) as quantity
+					 from(
+								select o.id as order_id, o.cust_id as customer_id, o.quantity as quantity, do.date as delivery_date
+								from orders as o
+								inner join
+								(
+										select order_id, date
+										from billing_details
+										where delivery_status='Delivered'
+								) as do on o.id=do.order_id
+					 ) as mpt
+					 group by customer_id
+		) as p on p.customer_id = c.id
+		order by c.id;
+		
+5.	Display customer Id, Name, undelivered date and reason for undelivery using joins.		
+	 	 
+	 Tables:
+		cust_details
+		orders
+		billing_details
+		cancelled_bills
+		
+	select c.id, c.name, b.order_id, cb.date as cancelled_bill_date, cb.reason
+	from billing_details b
+	join cancelled_bills cb on cb.inv_id=b.inv_id
+	join orders o on o.id=b.order_id
+	join cust_details c on c.id=o.cust_id;
+
+
+6. Display customer Id, Name and reason for Cancelled Orders of all cancellations made by all customers. 
+
+ Tables:
+	cust_details
+	orders
+	cancelled_orders
+	
+	select * from cust_details;
+	select * from orders;
+	select * from cancelled_orders;
+	
+Assignment
+	
+7. Display one customer from each product category who purchased maximum no of cylinders with Connection_Type, Cust_Id, Name and Quantity purchased.
+
+Tables:
+	orders
+	cust_details
+	
+	select distinct(c.connection_type), c.id, c.name, sum(o.quantity) as no_of_cylinders
+	from cust_details c
+	inner join orders o on o.cust_id=c.id
+	where o.status='Ordered'
+	group by c.connection_type, c.id, c.name;
+	
+	=> temp table
+	
+	select connection_type, max(no_of_cylinders) as max_cylinders,  calc.cust_name, calc.cust_id
+	from (	
+			select distinct(c.connection_type), c.id as cust_id, c.name as cust_name, sum(o.quantity) as no_of_cylinders
+			from cust_details c
+			inner join orders o on o.cust_id=c.id
+			where o.status='Ordered'
+			group by c.connection_type, c.id, c.name
+	) calc
+	group by connection_type;
+	
+8. Display Customer Id, Name, Order_Id, Inv_Id, Delivery Date of all deliveries received by customer for all customers
+
+	Tables:
+	cust_details
+	orders
+	billing_details
+	
+	i -> billing_details=> delivered
+		-> join with orders -> cust_id and date
+			-> cust_details get customers info.
