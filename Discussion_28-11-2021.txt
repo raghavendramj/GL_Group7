@@ -1,0 +1,33 @@
+List of doubts:
+----------------
+-> Spring Boot 
+	Componenet Scan and AutoConfiguration
+-> Spring MVC + Hibernates
+
+Spring MVC -> Model View and Controller
+
+Request -> Dispatcher Servlet / Front Controller(After all the opearations..) -> Response
+
+1. Incoming HTTP Request 
+	<url-pattern>/</url-pattern>
+		-> servlet-mapping::servlet-name -> dispatcher 
+			-> servlet::servlet-name  -> dispatcher (org.springframework.web.servlet.DispatcherServlet)
+				contextConfigLocation -> /WEB-INF/spring-mvc-demo-servlet.xml
+				
+	Dispatcher Servlet / Front Controller responsibities are...
+		View Resolver -> /WEB-INF/views/ + "Response from controller" + ".jsp" => ex. /WEB-INF/views/home.jsp
+		component-scan
+		dataSource -> driver, url, username, password
+		sessionFactory -> dataSource, annotatedClasses, hibernateProperties -> dialect, showsql, ddl
+		myTransactionManager -> sessionFactory
+
+2. Dispatcher Servlet -> Handler Mapping -> Find the controller -> BookController -> /books/list	
+3. Dispatcher Servlet -> Handler Adapater -> 
+	4. BookController:- (listBooks)-> setModel(Books)
+	5. nextViewName -> home -> DispatcherServlet
+
+6. DispatcherServlet --> nextViewName -> ViewResolver(resovles the view) =>   /WEB-INF/views/home.jsp
+7. View -> Response ->  /WEB-INF/views/home.jsp + Model -> Books
+
+	
+	

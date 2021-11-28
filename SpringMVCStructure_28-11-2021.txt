@@ -1,0 +1,59 @@
+@Entity
+Book
+	name, category, author
+BookService -> Interface
+	-> C -> saveBook(book);
+	-> R -> getAllBooks(), getBook(int bookId);
+	-> U -> updateBook(book / <name, category, author>)
+	-> D -> deleteBook(int bookId)
+	-> searchBook(category, author)
+
+@Repository
+BookServiceImpl
+	-> SessionFactory -> CRUD Method ->@Autowired -> Constrcutor Injection
+	-> Session
+	-> getAllBooks, getBook
+	-> searchBook(category, author)
+	@Transactional
+		saveBook, updateBook, deleteBook
+
+@Controller
+@RequestMapping("/books")
+BookController
+	-> /list -> listBooks(theModel) -> list-books + (Books -> theBooks)
+	-> /showFormForAdd -> showFormForAdd(theModel) -> book-form + (Book -> theBook) -> Create -> Model is optional
+	-> /showFormForUpdate -> showFormForUpdate(theModel) -> book-form + (Book -> theBook) -> Model is Mandatory
+	-> /save ->saveBook(id, category, author)
+			CREATE  -> id=0, name, category, author -> redirect:/books/list
+			UPDATE  -> id=4, name, category, author -> redirect:/books/list
+	-> /delete -> deleteBook(id) -> redirect:/books/list
+	-> /search -> searchBook(name, author) -> redirect:/books/list
+
+View JSPs
+	-> list-books.jsp
+			-> Create : Add, 
+			-> Get ->List of books -> 
+							-> Update : -> Btn: update, delete
+							-> Delete : -> Btn:  delete
+	-> showFormForAdd.jsp
+				id, category, author -> list-books.jsp
+	-> showFormForUpdate.jsp
+				id, category, author -> list-books.jsp
+				
+Request:
+	http://localhost:8188/sprinig_mvc_book_app/books/list
+		-> BookController /list  -> listBooks(theModel) -> list-books + (Books -> theBooks) -> list-books.jsp
+		
+	Add Book
+		-> http://localhost:8188/sprinig_mvc_book_app/books/showFormForAdd
+		-> BookController /showFormForAdd -> showFormForAdd(theModel) -> book-form + (Book -> theBook) -> Create -> Model is optional -> list-books.jsp
+		
+	Update Book
+		-> http://localhost:8188/sprinig_mvc_book_app/books/showFormForUpdate
+		-> BookController	/showFormForUpdate -> showFormForUpdate(theModel) -> book-form + (Book -> theBook) -> Model is Mandatory -> list-books.jsp
+		
+	Search Book
+		-> category, author -> 
+		-> BookController	/search -> searchBook(name, author) -> redirect:/books/list  -> list-books.jsp
+		
+		

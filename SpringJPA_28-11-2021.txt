@@ -1,0 +1,12 @@
+{  
+	"name": "Nimona",
+	"author": "Noelle Stevenson",
+	"category": "Programming"
+}
+
+
+RequestParam
+http://localhost:8081/searchBooks?author=Noelle Stevenson&name=
+
+PathVariable
+http://localhost:8081/books/3
