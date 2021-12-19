@@ -1,0 +1,104 @@
+Frameworks covered:
+--------------------------
+Spring Boot
+Spring Data JPA -> Hibernates
+Spring Security
+
+Step1:
+	Creating Spring Boot Project :- https://start.spring.io/
+	Dependecies Selected :-
+		spring-web -> RestFul API's and Spring MVC implementations.
+		spring-boot-starter-data-jpa -> Database (MySQL) Opeartions
+		spring-boot-starter-security -> for authentication and authorization
+		mysql-connector-java -> Driver for MySQL
+		lombok -> for reducing boilerplate code.
+
+	Layers:
+		Data Access Layer
+		--------------------
+			@Entity
+			Book
+				name, category, author
+			@Repository
+				BookRepository(I) extends JpaRepository<Book, Long>
+					By default => findById, findAll, save, deleteById, delete
+					Book findByBook(String bookName);
+
+		Service Layer
+		---------------
+			@Service
+			BookService(I)
+			C + R  + U + D
+				C -> Book saveBook(Book book);
+
+				R -> List<Book>getBooks(); -> findAll
+				R -> Book  getBookById(Long Id); -> findById
+
+				R -> Book getBookByName(String name);
+
+				U -> Book udpateBook(Long id, Book book);
+				D -> Book deleteBook(Long id);
+
+
+		Controller Layer
+		------------------
+		@RestController
+			@GetMapping("/books")
+			List<Book> getBooks();
+			URl:- http://localhost:8083/books/
+
+			@GetMapping("/books/{id}")
+			Book getBookById(@PathVariable("id") Long id)
+			URl:- http://localhost:8083/books/2
+
+			@GetMapping("/searchBook")
+			Book getBookById(@RequesrParam("bookName") String bookName)
+			URL:- http://localhost:8083/books/searchBook?name=Relationally%20Database
+
+			@PostMapping("/books")
+			Book saveBook(@RequestBody Book book)
+			URL :- http://localhost:8083/books/ + { "name" : "Relationally Database", "category":"Technology", "author":"DB Author" }
+
+			@PutMapping("/books/{id}")
+			Book updateBook(@PathVariable("id") Long id, @RequestBody Book book)
+			URL :- http://localhost:8083/books/4 + 4 + { "name" : "Relationally Database", "category":"Technology", "author":"DB Author"}
+
+			@DeleteMapping("/books/{id}")
+			Book deleteBook(@PathVariable("id"))
+
+		Spring Security
+			-> 1. spring-boot-starter-security -> redirected my acces to a login page with generated password (printed in console)
+			-> 2. added the following configs in the application.properties
+					spring.security.user.name=raghav
+					spring.security.user.password=raghav@123
+			-> 3. UserServiceImpl
+						-> spring-security's User object to have some hardcoded username and password -> admin, admin@123
+						-> NoOpPasswordEncoder
+			-> 4. Database authentication
+					-> From database.
+					-> BCryptedPasswordEncoder
+			-> 5. Role Based Authentication
+					-> /books -> Admin
+					-> /books/searchBook-> User
+
+		https://bcrypt-generator.com/ -> BCrypted Password Generator
+			Ex: 1234 -> $2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6
+			Ex: 12345 -> $2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO
+		Save username -> raghav, password -> $2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6 and then
+			login as raghavendra and 1234
+		DB:-
+			User
+				insert into user(username, password) values ("raghav", "$2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6");
+				insert into user(username, password) values ("keshav", "$2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO");
+			Roles:
+				insert into role(name) values ("USER"); 
+				insert into role(name) values ("ADMIN");
+			user_roles
+				insert into user_roles (1, 1);
+				insert into user_roles (2, 2);
+				
+				insert into users_roles values (1, 2);
+				insert into users_roles values (2, 1);
+			
+				id, 1 -> name 'raghav' => USER
+				id, 1 -> name 'keshav' => ADMIN

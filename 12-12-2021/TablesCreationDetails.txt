@@ -1,0 +1,33 @@
+Hibernate: 
+    
+    create table role (
+       role_id bigint not null auto_increment,
+        name varchar(255),
+        primary key (role_id)
+    ) engine=InnoDB
+Hibernate: 
+    
+    create table user (
+       user_id bigint not null auto_increment,
+        password varchar(255),
+        username varchar(255),
+        primary key (user_id)
+    ) engine=InnoDB
+Hibernate: 
+    
+    create table user_roles (
+       user_id bigint not null,
+        role_id bigint not null
+    ) engine=InnoDB
+Hibernate: 
+    
+    alter table user_roles 
+       add constraint FKrhfovtciq1l558cw6udg0h0d3 
+       foreign key (role_id) 
+       references role (role_id)
+Hibernate: 
+    
+    alter table user_roles 
+       add constraint FK55itppkw3i07do3h7qoclqd4k 
+       foreign key (user_id) 
+       references user (user_id)

@@ -1,0 +1,42 @@
+---------+--------------------------------------------------------------+----------+
+|       1 | $2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6 | raghav   |
+|       2 | $2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO | keshav   |
+
+
+---------+--------------------------------------------------------------+----------+
+|       1 | $2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6 | raghav   |
+|       2 | $2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO | keshav   |
+
+   1 | ADMIN |
+   2 | USER
+  
+book                       |
+| role                       |
+| roles                      |
+| user                       |
+| user_roles                 |
+| users                      |
+| users_roles
+
+
+$2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6-> 1234
+$2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO -> 12345
+   
+insert into users (username, password) values ( "raghav", "$2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6" );
+insert into users (username, password) values ( "keshav", "$2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO" );
+select * from users;
+
+insert into roles(name) values ("USER");
+insert into roles(name) values ("ADMIN");
+select * from roles;
+
+insert into users_roles values (1, 1);
+insert into users_roles values (2, 2);
+select * from users_roles;
+
+
+ "name": "Spring Secuirty",
+    "category": "Technology",
+    "author": "Spring Author"
+
+
