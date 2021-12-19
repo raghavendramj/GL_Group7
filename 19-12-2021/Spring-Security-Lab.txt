@@ -1,0 +1,104 @@
+Frameworks covered:
+--------------------------
+Spring Boot
+Spring Data JPA -> Hibernates
+Spring Security
+
+Step1:
+	Creating Spring Boot Project :- https://start.spring.io/
+	Dependecies Selected :-
+		spring-web -> RestFul API's and Spring MVC implementations.
+		spring-boot-starter-data-jpa -> Database (MySQL) Opeartions
+		spring-boot-starter-security -> for authentication and countryization
+		mysql-connector-java -> Driver for MySQL
+		lombok -> for reducing boilerplate code.
+
+	Layers:
+		Data Access Layer
+		--------------------
+			@Entity
+			Student
+				name, department, country
+			@Repository
+				StudentRepository(I) extends JpaRepository<Student, Long>
+					By default => findById, findAll, save, deleteById, delete
+					Student findByStudent(String studentName);
+
+		Service Layer
+		---------------
+			@Service
+			StudentService(I)
+			C + R  + U + D
+				C -> Student saveStudent(Student student);
+
+				R -> List<Student>getStudents(); -> findAll
+				R -> Student  getStudentById(Long Id); -> findById
+
+				R -> Student getStudentByName(String name);
+
+				U -> Student udpateStudent(Long id, Student student);
+				D -> Student deleteStudent(Long id);
+
+
+		Controller Layer
+		------------------
+		@RestController
+			@GetMapping("/students")
+			List<Student> getStudents();
+			URl:- http://localhost:8083/students/
+
+			@GetMapping("/students/{id}")
+			Student getStudentById(@PathVariable("id") Long id)
+			URl:- http://localhost:8083/students/2
+
+			@GetMapping("/searchStudent")
+			Student getStudentById(@RequesrParam("studentName") String studentName)
+			URL:- http://localhost:8083/students/searchStudent?name=Relationally%20Database
+
+			@PostMapping("/students")
+			Student saveStudent(@RequestBody Student student)
+			URL :- http://localhost:8083/students/ + { "name" : "Relationally Database", "department":"Technology", "country":"DB Author" }
+
+			@PutMapping("/students/{id}")
+			Student updateStudent(@PathVariable("id") Long id, @RequestBody Student student)
+			URL :- http://localhost:8083/students/4 + 4 + { "name" : "Relationally Database", "department":"Technology", "country":"DB Author"}
+
+			@DeleteMapping("/students/{id}")
+			Student deleteStudent(@PathVariable("id"))
+
+		Spring Security
+			-> 1. spring-boot-starter-security -> redirected my acces to a login page with generated password (printed in console)
+			-> 2. added the following configs in the application.properties
+					spring.security.user.name=raghav
+					spring.security.user.password=raghav@123
+			-> 3. UserServiceImpl
+						-> spring-security's User object to have some hardcoded username and password -> admin, admin@123
+						-> NoOpPasswordEncoder
+			-> 4. Database authentication
+					-> From database.
+					-> BCryptedPasswordEncoder
+			-> 5. Role Based Authentication
+					-> /students -> Admin
+					-> /students/searchStudent-> User
+
+		https://bcrypt-generator.com/ -> BCrypted Password Generator
+			Ex: 1234 -> $2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6
+			Ex: 12345 -> $2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO
+		Save username -> raghav, password -> $2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6 and then
+			login as raghavendra and 1234
+		DB:-
+			User
+				insert into user(username, password) values ("raghav", "$2a$12$sSGybNNccmkUEU/cTckz2uASTRjbaXeO9KJN.pMyr/c/KLY4FngY6");
+				insert into user(username, password) values ("keshav", "$2a$12$CTzLIsck5p2v3w445DZKNOBDqLAIDtCK.LS4jgYpCj/Sn9AsA2ZXO");
+			Roles:
+				insert into role(name) values ("USER"); 
+				insert into role(name) values ("ADMIN");
+			user_roles
+				insert into user_roles (1, 1);
+				insert into user_roles (2, 2);
+				
+				insert into users_roles values (1, 2);
+				insert into users_roles values (2, 1);
+			
+				id, 1 -> name 'raghav' => USER
+				id, 1 -> name 'keshav' => ADMIN
